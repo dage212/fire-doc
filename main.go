@@ -17,7 +17,7 @@ type UserList struct {
 }
 
 func main() {
-	// 创建一个默认的 Gin 实例
+
 	r := gin.Default()
 
 	r.GET("/", func(c *gin.Context) {
