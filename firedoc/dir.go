@@ -32,6 +32,6 @@ func Dir() string {
 	version := strings.TrimSpace(string(versionBytes))
 
 	// Construct full path including dist subdirectory
-	basePath := filepath.Join(modCache, pkg+version, "frontend/dist")
+	basePath := filepath.Join(modCache, pkg+"@"+version, "frontend/dist")
 	return basePath
 }
