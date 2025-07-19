@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/dage212/fire-doc/firedoc"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,7 +18,7 @@ type UserList struct {
 }
 
 func main() {
-
+	fmt.Println("Starting server...", firedoc.Dir())
 	r := gin.Default()
 
 	r.GET("/", func(c *gin.Context) {
@@ -46,7 +47,7 @@ func main() {
 		}
 	})
 
-	r.Static("/fire-doc", "./fire-doc/dist/")
+	r.Static("/fire-doc", firedoc.Dir())
 	// 启动 Gin，监听并在 0.0.0.0:8080 上提供服务
 	r.Run()
 }
