@@ -10,7 +10,7 @@ const RootContainer = styled.div`
   width: 100%;
   height: 100%;
 `
-
+console.log(123123)
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <RootContainer>
