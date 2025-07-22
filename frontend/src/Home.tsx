@@ -1,7 +1,7 @@
 
 import { Layout, Nav, Button, Breadcrumb, Avatar } from '@douyinfe/semi-ui';
 import { IconBell, IconHelpCircle, IconBytedanceLogo, IconHome, IconHistogram, IconLive, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
-import FormArea from "./FormArea";
+import { Link, Outlet } from 'react-router';
 
 const { Header, Footer, Sider, Content } = Layout;
 
@@ -15,11 +15,15 @@ function Home() {
                         defaultSelectedKeys={['Home']}
                         style={{ maxWidth: 220, height: '100%' }}
                         items={[
-                            { itemKey: 'Home', text: '首页', icon: <IconHome size="large" /> },
-                            { itemKey: 'Histogram', text: '基础数据', icon: <IconHistogram size="large" /> },
+                            { itemKey: 'page', text: 'Page Request', icon: <IconHome size="large" /> },
+                            { itemKey: 'code', text: 'Code Request', icon: <IconHistogram size="large" /> },
                             { itemKey: 'Live', text: '测试功能', icon: <IconLive size="large" /> },
                             { itemKey: 'Setting', text: '设置', icon: <IconSetting size="large" /> },
                         ]}
+                        renderWrapper={({ itemElement, props }: { itemElement: React.ReactNode, props: { itemKey: string } }) => {
+                            return <Link style={{ textDecoration: "none" }} to={props.itemKey}>{itemElement}</Link>;
+
+                        }}
                         header={{
                             logo: <IconSemiLogo style={{ fontSize: 36 }} />,
                             text: 'Semi Design',
@@ -65,12 +69,6 @@ function Home() {
                             backgroundColor: 'var(--semi-color-bg-0)',
                         }}
                     >
-                        <Breadcrumb
-                            style={{
-                                marginBottom: '24px',
-                            }}
-                            routes={['首页', '当这个页面标题很长时需要省略', '上一页', '详情页']}
-                        />
                         <div
                             style={{
                                 borderRadius: '10px',
@@ -79,7 +77,7 @@ function Home() {
                                 padding: '32px',
                             }}
                         >
-                            <FormArea/>
+                            <Outlet />
                         </div>
                     </Content>
                     <Footer
@@ -98,11 +96,7 @@ function Home() {
                             }}
                         >
                             <IconBytedanceLogo size="large" style={{ marginRight: '8px' }} />
-                            <span>Copyright © 2019 ByteDance. All Rights Reserved. </span>
-                        </span>
-                        <span>
-                            <span style={{ marginRight: '24px' }}>平台客服</span>
-                            <span>反馈建议</span>
+                            <span>Copyright © 2025 dage212. All Rights Reserved. </span>
                         </span>
                     </Footer>
                 </Layout>

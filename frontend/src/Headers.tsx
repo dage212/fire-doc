@@ -36,7 +36,7 @@ function Headers() {
             render: (key: string, record: DataSource, index: number) => {
                 console.log('render key', key);
                 return (
-                    <Input value={dataSource[index]['key']} onChange={(value) => update("key", value, record, index)} key={record.uuid}/>
+                    <Input value={dataSource[index]['key']} onChange={(value:string) => update("key", value, record, index)} key={record.uuid}/>
                 )
             }
         },
@@ -46,7 +46,7 @@ function Headers() {
             render: (key: string, record: DataSource, index: number) => {
                 console.log('render value', key);
                 return (
-                    <Input value={dataSource[index]['value']} onChange={(value) => update("value", value, record, index)} key={record.uuid}/>
+                    <Input value={dataSource[index]['value']} onChange={(value:string) => update("value", value, record, index)} key={record.uuid}/>
                 )
             }
         },
