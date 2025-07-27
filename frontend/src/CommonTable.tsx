@@ -1,8 +1,7 @@
 import { Button, Input, Table } from "@douyinfe/semi-ui";
 import { IconMinusCircle, IconPlusCircle } from '@douyinfe/semi-icons';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react";
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useState } from "react";
 import { cloneDeep } from "lodash";
-import { withField } from "@douyinfe/semi-ui";
 
 export type DataSource = {
     keys: string;
@@ -10,13 +9,8 @@ export type DataSource = {
     uuid: string;
 }
 
-interface Props {
-        // onChange: (val: unknown) => void;
-        field: string;
-        // value: DataSource[] | undefined;
-        ref: React.Ref<HTMLElement>;
-}
-const CommonTable = forwardRef((props, ref) => {
+
+const CommonTable = forwardRef((_, ref) => {
 
     const [dataSource, setDataSource] = useState<DataSource[]>([{keys: '', value: '', uuid: `${new Date().getTime()}_${0}`}]);
 
@@ -99,5 +93,4 @@ const CommonTable = forwardRef((props, ref) => {
     )
 })
 
-// const CustomField = withField(CommonTable, { valueKey: 'value', onKeyChangeFnName: 'onChange' });
 export default CommonTable;

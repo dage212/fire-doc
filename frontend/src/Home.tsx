@@ -1,6 +1,6 @@
 
 import { Layout, Nav, Button, Avatar } from '@douyinfe/semi-ui';
-import { IconBell, IconHelpCircle, IconBytedanceLogo, IconHome, IconHistogram, IconLive, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
+import { IconBell, IconHelpCircle, IconBytedanceLogo, IconHome, IconHistogram, IconLive } from '@douyinfe/semi-icons';
 import { Link, Outlet, useLocation } from 'react-router';
 import { IconTextRectangle } from '@douyinfe/semi-icons';
 import { useEffect, useState } from 'react';
