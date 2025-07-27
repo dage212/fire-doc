@@ -9,8 +9,9 @@ const router = createBrowserRouter([
     Component: Home,
     children: [
       {
-        path: "page",
+        path: "",
         Component: Page,
+        index: true,
       },
       {
         path: "code",
