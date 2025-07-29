@@ -33,7 +33,9 @@ r.Static("/fire-doc", firedoc.Dir())
 ```
 open localhost:8080/fire-doc
 ```   
-
+4. Open the page and enjoy it
+   
+![alt text](image.png)
 
 
 ## 🎯 Code Examples
