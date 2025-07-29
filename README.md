@@ -1,14 +1,15 @@
-# Fire-Doc - API Documentation Generator
+# fire doc
 
-fire-doc is a lightweight Postman alternative that requires no additional software installation. Simply import the fire-doc package to use it, supporting various request types.
+fire-doc is a streamlined integration of postman and swagger. Unlike Swagger, which necessitates extensive annotation code, and unlike postman, which mandates downloading, installing, logging in, and registering, fire-doc merely requires altering a single line of code to facilitate interface documentation and debugging.
 
-## ✨ Key Features
+## fire doc vs swagger
+ 
+- **Simple**: No need to write code comments
+- **Better Experience** : The page experience is better than swagger
 
-- **Code-First Approach**: Generate docs directly from your Go code
-- **Multiple Output Formats**: Support for OpenAPI/Swagger, Markdown and HTML
-- **Live Reload**: Preview changes instantly during development
-- **CLI Tool**: Easy to integrate into your build process
-- **Custom Templates**: Flexible template system for documentation
+## fire doc vs postman
+- **Simple**: No additional software installation required
+- **Better Experience**: fire doc does not require login or registration, just open the page and use it
 
 ## 🚀 Installation
 
@@ -46,22 +47,23 @@ import (
 )
 
 type Example struct {
-	Name string `json:"name"`
-	List []List `json:"list"`
+	Class string `json:"class"`
+	Students []Student `json:"students"`
 }
 
-type List struct {
-	First  string `json:"first"`
-	Second string `json:"second"`
+type Student struct {
+	Name  string `json:"name"`
+	Age string `json:"age"`
 }
 
 func main() {
 	fmt.Println("Starting server...", firedoc.Dir())
 	r := gin.Default()
 	r.Use(func(c *gin.Context) {
+		// allow cors requests
 		c.Header("Access-Control-Allow-Origin", "http://localhost:8080")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, Name")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		c.Header("Access-Control-Allow-Credentials", "true")
 
 		if c.Request.Method == "OPTIONS" {
