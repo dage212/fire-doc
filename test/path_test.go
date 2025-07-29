@@ -25,7 +25,7 @@ func TestPath(t *testing.T) {
 	}
 	pkg := "github.com/dage212/fire-doc"
 	path := firedoc.Dir()
-	if path != filepath.Join(modCache, pkg+"@v1.0.9", "frontend/dist") {
+	if path != filepath.Join(modCache, pkg+"@v1.0.10-beta", "frontend/dist") {
 		t.Error(path)
 	} else {
 		t.Logf("Path: %s", path)

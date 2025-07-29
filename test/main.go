@@ -9,22 +9,24 @@ import (
 )
 
 type Example struct {
-	Name string `json:"name"`
-	List []List `json:"list"`
+	Class    string    `json:"class"`
+	Students []Student `json:"students"`
 }
 
-type List struct {
-	First  string `json:"first"`
-	Second string `json:"second"`
+type Student struct {
+	Name string `json:"name"`
+	Age  string `json:"age"`
 }
 
 func main() {
 	fmt.Println("Starting server...", firedoc.Dir())
 	r := gin.Default()
 	r.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
+		// allow cors requests
+		// tips: Note that the port here is the port of your local gin service
+		c.Header("Access-Control-Allow-Origin", "http://localhost:8080")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, Name")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		c.Header("Access-Control-Allow-Credentials", "true")
 
 		if c.Request.Method == "OPTIONS" {
@@ -35,8 +37,6 @@ func main() {
 	})
 	r.GET("/api/get", func(c *gin.Context) {
 		name, _ := c.GetQuery("name")
-		// 设置名为 token 的 Cookie，值为 "example-token"，有效期 3600 秒，路径为 /
-		// 修改为 SameSite=None 且 Secure=true
 		c.SetSameSite(http.SameSiteNoneMode)
 		c.SetCookie("tokensv", "example-token", 3600, "/", "", true, true)
 		c.JSON(200, gin.H{
@@ -65,10 +65,8 @@ func main() {
 			})
 		}
 	})
-	// 远程包
-	// r.Static("/fire-doc", firedoc.Dir())
-	//本地
-	r.Static("/fire-doc", "../frontend/dist")
-	// 启动 Gin，监听并在 0.0.0.0:8080 上提供服务
+	// TIPS: example start
+	r.Static("/fire-doc", firedoc.Dir())
+	// TIPS: example end
 	r.Run()
 }
