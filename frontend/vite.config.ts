@@ -7,6 +7,10 @@ export default defineConfig({
   base: '/fire-doc/',
   server: {
     proxy: {
+      '/firedoc': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,

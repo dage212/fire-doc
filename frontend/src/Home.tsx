@@ -1,76 +1,94 @@
+import { useMemo, useState } from 'react';
+import { Layout, Nav, Avatar, Image, Button } from '@douyinfe/semi-ui';
+import { IconCloud } from '@douyinfe/semi-icons';
+import { Outlet } from 'react-router';
+import SplitPane from 'react-split-pane';
+import styled from 'styled-components';
+import InnerList from './innerList';
+import { MyContext } from './contexts';
+import bg from './assets/bg.png'
 
-import { Layout, Nav, Button, Avatar } from '@douyinfe/semi-ui';
-import { IconBell, IconHelpCircle, IconBytedanceLogo, IconHome, IconHistogram, IconLive } from '@douyinfe/semi-icons';
-import { Link, Outlet, useLocation } from 'react-router';
-import { IconTextRectangle } from '@douyinfe/semi-icons';
-import { useEffect, useState } from 'react';
-import { Typography } from '@douyinfe/semi-ui';
+const { Header, Content } = Layout;
 
-const { Header, Footer, Sider, Content } = Layout;
+const SplitPaneStyle = styled(SplitPane)`
+.Resizer {
+  background: var(--semi-color-border);
+  z-index: 1;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding;
+  background-clip: padding-box;
+}
+
+.Resizer:hover {
+  -webkit-transition: all 2s ease;
+  transition: all 2s ease;
+  opacity: 0.2;
+}
+
+.Resizer.horizontal {
+  height: 11px;
+  margin: -5px 0;
+  border-top: 5px solid var(--semi-color-border);
+  border-bottom: 5px solid var(--semi-color-border);
+  cursor: row-resize;
+  width: 100%;
+}
+
+.Resizer.horizontal:hover {
+  border-top: 5px solid rgba(0, 0, 0, 0.5);
+  border-bottom: 5px solid rgba(0, 0, 0, 0.5);
+}
+
+.Resizer.vertical {
+  width: 11px;
+  margin: 0 -5px;
+  border-left: 5px solid rgba(255, 255, 255, 0);
+  border-right: 5px solid rgba(255, 255, 255, 0);
+  cursor: col-resize;
+}
+
+.Resizer.vertical:hover {
+  border-left: 5px solid rgba(0, 0, 0, 0.5);
+  border-right: 5px solid rgba(0, 0, 0, 0.5);
+}
+.Resizer.disabled {
+  cursor: not-allowed;
+}
+.Resizer.disabled:hover {
+  border-color: transparent;
+}
+`
 
 function Home() {
-    const [selectedKey, setSelectedKey] = useState('');
-    const location = useLocation()
-    useEffect(() => {
-        setSelectedKey(location.pathname.slice(1));
-    }, [location]);
+    const [refresh, setRefresh] = useState(false);
+    const value = useMemo(() => ({ refresh, setRefresh }), [refresh]);
     return (
         <Layout style={{ border: '1px solid var(--semi-color-border)',height: '100%' }}>
-                    <Sider style={{ backgroundColor: 'var(--semi-color-bg-1)' }}>
-                        <Nav
-                            defaultSelectedKeys={[selectedKey]}
-                            style={{ maxWidth: 220, height: '100%' }}
-                            items={[
-                                { itemKey: '', text: 'Page Request', icon: <IconHome size="large" /> },
-                                { itemKey: 'code', text: 'Code Request', icon: <IconHistogram size="large" /> },
-                                { itemKey: 'dev', text: 'Pending Development', icon: <IconLive size="large" /> },
-                            ]}
-                            renderWrapper={({ itemElement, props }: { itemElement: React.ReactNode, props: { itemKey: string } }) => {
-                                return <Link style={{ textDecoration: "none" }} to={props.itemKey}>{itemElement}</Link>;
-
-                            }}
-                            header={{
-                                logo: <Typography.Text icon={<IconTextRectangle style={{ fontSize: 36 }} />} link={{ href: 'https://github.com/dage212/fire-doc' }}></Typography.Text>,
-                                text: <Typography.Text link={{ href: 'https://github.com/dage212/fire-doc' }}><span style={{fontSize: 20}}>Fire Doc</span></Typography.Text>,
-                            }}
-                            footer={{
-                                collapseButton: true,
-                                collapseText: () => 'Toggle Sidebar',
-                            }}
-                        />
-                    </Sider>
                     <Layout style={{ height: '100%' }}>
-                        <Header style={{ backgroundColor: 'var(--semi-color-bg-1)' }}>
-                            <Nav
-                                mode="horizontal"
-                                footer={
-                                    <>
-                                        <Button
-                                            theme="borderless"
-                                            icon={<IconBell size="large" />}
-                                            style={{
-                                                color: 'var(--semi-color-text-2)',
-                                                marginRight: '12px',
-                                            }}
-                                        />
-                                        <Button
-                                            theme="borderless"
-                                            icon={<IconHelpCircle size="large" />}
-                                            style={{
-                                                color: 'var(--semi-color-text-2)',
-                                                marginRight: '12px',
-                                            }}
-                                        />
-                                        <Avatar color="orange" size="small">
-                                            YJ
-                                        </Avatar>
-                                    </>
-                                }
-                            ></Nav>
+                        <Header style={{ backgroundColor: 'var(--semi-color-bg-1)', display: 'flex'}}>
+                            <Nav mode="horizontal" defaultSelectedKeys={['Home']}>
+                        <Nav.Header>
+                            <Image src={bg} width={80} height={40} />
+                        </Nav.Header>
+                        <Nav.Footer>
+                            <Button
+                                icon={<IconCloud />}
+                                style={{
+                                    // color: 'var(--semi-color-text-2)',
+                                    marginRight: '12px',
+                                }}
+                            >Publish</Button>
+                            <Avatar color="orange" size="small">
+                                YJ
+                            </Avatar>
+                        </Nav.Footer>
+                    </Nav>
                         </Header>
                         <Content
                             style={{
-                                padding: '24px',
                                 height: '100%',
                                 backgroundColor: 'var(--semi-color-bg-0)',
                             }}
@@ -78,36 +96,22 @@ function Home() {
                             <div
                                 style={{
                                     borderRadius: '10px',
-                                    border: '1px solid var(--semi-color-border)',
-                                    height: 'calc(100% - 104px)',
-                                    padding: '32px',
+                                    height: '100%',
+                                    position: 'relative',
                                 }}
                             >
-                                <Outlet />
+                                <MyContext.Provider value={value}>
+                                    <SplitPaneStyle split="vertical" minSize={100} defaultSize={300}>
+                                            <InnerList />
+                                            <Outlet />
+                                    </SplitPaneStyle>
+                                </MyContext.Provider>
                             </div>
                         </Content>
-                        <Footer
-                            style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                padding: '20px',
-                                color: 'var(--semi-color-text-2)',
-                                backgroundColor: 'rgba(var(--semi-grey-0), 1)',
-                            }}
-                        >
-                            <span
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <IconBytedanceLogo size="large" style={{ marginRight: '8px' }} />
-                                <span>Copyright © 2025 <Typography.Text link={{ href: 'https://github.com/dage212/fire-doc' }}>dage212</Typography.Text>. All Rights Reserved. </span>
-                            </span>
-                        </Footer>
                     </Layout>
                 </Layout>
     );
 }
 
 export default Home;
+

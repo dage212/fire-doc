@@ -1,45 +1,15 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 
+import Editor from '@monaco-editor/react';
+import type { JSONEditorProps } from "./types";
 
-import * as ace from 'brace';
-import 'brace/mode/json';
-import 'brace/theme/github';
 
-interface JSONEditorProps {
-        onChange?: (val: unknown) => void;
-        field?: string;
-        id: string;
-        mode: string;
-        defaultValue: string
-
-}
 
 export type CustomBodyRefProps = {
   getValue: () => string | undefined;
 }
 const JSONEditorReact = forwardRef<CustomBodyRefProps, JSONEditorProps>((props, ref) => {
     const [value, setValue] = useState<string>();
-
-    useEffect(() => {
-        const editor = ace.edit(props.id);
-        editor.getSession().setMode(`ace/mode/${props.mode}`);
-        editor.setTheme('ace/theme/github');
-        editor.setOptions({
-            fontSize: '14px',
-            showPrintMargin: false,
-            highlightActiveLine: true,
-            showGutter: true,
-            tabSize: 2,
-            enableAutoIndent: true,
-            useSoftTabs: true,
-        });
-        editor.setValue(props.defaultValue);
-        editor.session.on('change', function() {
-            const str = editor.getValue()
-            setValue(str)
-        });
-        editor.clearSelection();
-    },[props.id, props.mode, props.defaultValue])
 
     useImperativeHandle(ref, () => {
         return {
@@ -49,7 +19,34 @@ const JSONEditorReact = forwardRef<CustomBodyRefProps, JSONEditorProps>((props, 
         }
     }, [value])
     
-    return (<div id={props.id} style={{height:'400px', margin: '20px'}}></div>);
+    const handleEditorChange = (val: string | undefined) => {
+      setValue(val)
+    }
+
+    useEffect(() => {
+      setValue(props.defaultValue)
+    }, [props.defaultValue])
+    
+    return (<div style={{height: 400}}>
+      <Editor 
+        height="100%" 
+        defaultLanguage={props.mode || 'json'} 
+        value={value} 
+        onChange={handleEditorChange}
+        options={{ 
+            scrollBeyondLastLine: false,
+            scrollbar: {
+                vertical: 'hidden',
+                horizontal: 'hidden',
+            },
+            glyphMargin: false,
+            lineNumbersMinChars: 1,
+            lineDecorationsWidth: 0,
+            minimap: { enabled: false },
+            readOnly: props.readOnly || false // Added read-only option
+        }}
+      />
+    </div>);
 });
 
 export default JSONEditorReact;

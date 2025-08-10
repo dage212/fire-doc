@@ -1,7 +1,8 @@
 import { createBrowserRouter } from "react-router";
 import Home from "./Home";
-import Code from "./Code";
+// import Code from "./Code";
 import Page from "./Page";
+// import List from "./List";
 
 const router = createBrowserRouter([
   {
@@ -14,9 +15,17 @@ const router = createBrowserRouter([
         index: true,
       },
       {
-        path: "code",
-        Component: Code,
-      }
+        path: ":id",
+        Component: Page,
+      },
+      // {
+      //   path: "code",
+      //   Component: Code,
+      // },
+      // {
+      //   path: "list",
+      //   Component: List,
+      // }
     ]
   }
 ], {
