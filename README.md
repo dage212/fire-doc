@@ -35,7 +35,7 @@ open localhost:8080/fire-doc
 ```   
 4. Open the page and enjoy it
    
-![alt text](image.png)
+![alt text](example.png)
 
 
 ## 🎯 Code Examples
@@ -53,13 +53,13 @@ import (
 )
 
 type Example struct {
-	Class string `json:"class"`
+	Class    string    `json:"class"`
 	Students []Student `json:"students"`
 }
 
 type Student struct {
-	Name  string `json:"name"`
-	Age string `json:"age"`
+	Name string `json:"name"`
+	Age  string `json:"age"`
 }
 
 func main() {
@@ -67,6 +67,8 @@ func main() {
 	r := gin.Default()
 	r.Use(func(c *gin.Context) {
 		// allow cors requests
+
+		// tips: Note that the port here is the port of your local gin service
 		c.Header("Access-Control-Allow-Origin", "http://localhost:8080")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
@@ -108,10 +110,34 @@ func main() {
 			})
 		}
 	})
-	// TIPS: example start 
-	r.Static("/fire-doc", firedoc.Dir())
-        // TIPS: example end 
+
+	r.POST("/api/raw", func(c *gin.Context) {
+
+		rawData, err := c.GetRawData()
+		if err != nil {
+			c.JSON(400, gin.H{
+				"code":    400,
+				"status":  "error",
+				"message": "Failed to read request body",
+			})
+			return
+		}
+
+		strData := string(rawData)
+
+		c.JSON(200, gin.H{
+			"code":    200,
+			"status":  "success",
+			"data":    strData,
+			"message": "Successfully received raw string data",
+		})
+	})
+	// TIPS: example start
+	// r.Static("/fire-doc", firedoc.Dir())
+	// TIPS: example end
+	r.Any("/fire-doc/*path", gin.WrapH(http.HandlerFunc(firedoc.FireDocIndexHandler)))
 	r.Run()
 }
+
 
 ```
