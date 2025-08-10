@@ -160,7 +160,7 @@ const ButtonGroup: React.FC<SendBtnProps> = (props:SendBtnProps) => {
     const confirm = useCallback((description: string) => {
       const { values, params, headers, body } = requestAll(formApi, props);
       console.log('confirm values:', values)
-      axios.post('/firedoc/save', {
+      axios.post('/fire-doc/api/save', {
         id: values.id,
         general: {
           url: values.general.url,
@@ -182,7 +182,6 @@ const ButtonGroup: React.FC<SendBtnProps> = (props:SendBtnProps) => {
       })
     },[formApi, navigate, props, setRefresh]);
 
-    
 
     return (
       <>
@@ -226,20 +225,22 @@ const FormArea: React.FC = () => {
     const headersRef = useRef<RefProps>(null);
     const bodyRef = useRef<ComposeRefProps>(null);
     const [response, setResponse] = useState<string>('')
+    const { refresh } = useContext(MyContext);
     const formApiRef = useRef<FormApiRef>(null);
     const [data, setData] = useState<DataSource>({} as DataSource)
     const params = useParams();
     useEffect(() => { 
-      axios.get(`/firedoc/get?id=${params.id}`).then((res) => {
+      axios.get(`/fire-doc/api/get?id=${params.id}`).then((res) => {
             console.log(`Get ${params.id} Response:`, res.data)
             const formData = res.data?.[0] ?? {};
             formApiRef.current?.formApi?.setValues(formData);
+            setResponse('')
             setData(formData)
         }).catch((error) => {
             setData({} as DataSource);
             console.error('Error fetching data:', error);
         })
-    }, [params.id])
+    }, [params.id, refresh])
 
    
     return (

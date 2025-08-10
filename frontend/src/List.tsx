@@ -9,7 +9,7 @@ import type { DataSource } from './types';
 
 
 function del(id: string) {
-    axios.delete(`/firedoc/del/${id}`).then((res) => {
+    axios.delete(`/fire-doc/api/del/${id}`).then((res) => {
         console.log('del response:', res)
     })
 }
@@ -148,7 +148,7 @@ function List() {
     };
 
     useEffect(() => {
-        axios.get('/firedoc/get').then((res) => {
+        axios.get('/fire-doc/api/get').then((res) => {
             console.log('list response:', res.data)
             setData(res.data)
         }).catch((error) => {

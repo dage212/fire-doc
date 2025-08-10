@@ -40,13 +40,12 @@ function TagColor({method}: {method: string}) {
 }
 function InnerList() {
     const [data, setData] = useState<DataSource[]>([])
-    const [id, setId] = useState<string>('');
     const { refresh, setRefresh } = useContext(MyContext)
     
     const navigate = useNavigate()
     const params = useParams();
     useEffect(() => {
-        axios.get('/firedoc/get').then((res) => {
+        axios.get('/fire-doc/api/get').then((res) => {
             console.log('GET All Succesful:', res.data)
             setData(res.data)
         }).catch((error) => {
@@ -57,7 +56,7 @@ function InnerList() {
 
     const del = useCallback((id: string) => {
         setRefresh(bool => !bool)
-        axios.delete(`/firedoc/del/${id}`).then(() => {
+        axios.delete(`/fire-doc/api/del/${id}`).then(() => {
             navigate('/')
         })
         setData(data.filter((item) => item.id !== id))
@@ -65,7 +64,7 @@ function InnerList() {
 
     const search = useCallback((value: string) => {
         console.log('Search Value:', value)
-        axios.get(`/firedoc/get?url=${value}`).then((res) => {
+        axios.get(`/fire-doc/api/get?url=${value}`).then((res) => {
             console.log('Search Succesful:', res.data)
             setData(res.data)
         }).catch((error) => {
@@ -85,9 +84,8 @@ function InnerList() {
         <List
             dataSource={data}
             renderItem={(item:DataSource) => (
-                <ListItemWrapper className={item.id === id || params.id === item.id ? 'selectd-item': ''} onClick={() => {
+                <ListItemWrapper className={params.id === item.id ? 'selectd-item': ''} onClick={() => {
                     navigate(`/${item.id}`);
-                    setId(item.id);
                 }}>
                     <div style={{width: '100%'}}>
                         <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
@@ -111,6 +109,7 @@ function InnerList() {
                         <ButtonGroup size={'small'} type="tertiary" theme="borderless">
                             <Button style={{fontSize: 12, fontWeight: 'normal', color: 'var(--semi-color-primary)'}} onClick={(e: React.MouseEvent) => {
                                 e.stopPropagation()
+                                alert('GoDoc is not implemented yet');
                             }}>GoDoc</Button>
                             <Button style={{fontSize: 12, fontWeight: 'normal', color: 'var(--semi-color-danger)'}} onClick={(e: React.MouseEvent) => {
                                 e.stopPropagation()

@@ -71,17 +71,24 @@ function Home() {
                         <Header style={{ backgroundColor: 'var(--semi-color-bg-1)', display: 'flex'}}>
                             <Nav mode="horizontal" defaultSelectedKeys={['Home']}>
                         <Nav.Header>
-                            <Image src={bg} width={80} height={40} />
+                            <Image style={{cursor: 'pointer'}} src={bg} width={80} height={40} preview={false} alt="logo" onClick={() => {
+                                window.location.href = 'https://github.com/dage212/fire-doc';
+                            }}/>
                         </Nav.Header>
                         <Nav.Footer>
                             <Button
                                 icon={<IconCloud />}
+                                onClick={() => {
+                                    alert('Not implemented yet.\nThis will become a cloud service feature.');
+                                }}
                                 style={{
                                     // color: 'var(--semi-color-text-2)',
                                     marginRight: '12px',
                                 }}
                             >Publish</Button>
-                            <Avatar color="orange" size="small">
+                            <Avatar color="orange" size="small" onClick={() => {
+                                    alert('Not implemented yet.\nThis will become a cloud service feature.');
+                                }}>
                                 YJ
                             </Avatar>
                         </Nav.Footer>

@@ -270,12 +270,14 @@ func FireDocHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		urlPath = []string{""}
 	}
-	absPath := filepath.Join(Dir(), strings.Join(urlPath, "/"))
-	// absPath := filepath.Join("E:/fire-doc/frontend/dist", strings.Join(urlPath, "/"))
-	// if _, err := os.Stat(absPath); os.IsNotExist(err) {
-	// 	// Serve index.html as a fallback
-	// 	absPath = filepath.Join("E:/fire-doc/frontend/dist", "index.html")
-	// }
+	var absPath string
+	if !strings.Contains(urlPath[0], ".") || urlPath[0] == "" {
+		absPath = filepath.Join(Dir(), "index.html")
+	} else {
+		absPath = filepath.Join(Dir(), urlPath[0])
+
+	}
+
 	http.ServeFile(w, r, absPath)
 }
 
