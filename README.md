@@ -27,7 +27,7 @@ go get github.com/dage212/fire-doc/firedoc@latest
 
 2. Modify the code:
 ```powershell
-r.Static("/fire-doc", firedoc.Dir())
+r.Any("/fire-doc/*path", gin.WrapH(http.HandlerFunc(firedoc.FireDocIndexHandler)))
 ```
 3. Run the fire-doc, port is your local service port:
 ```
