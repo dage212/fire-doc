@@ -65,21 +65,6 @@ type Student struct {
 func main() {
 	fmt.Println("Starting server...", firedoc.Dir())
 	r := gin.Default()
-	r.Use(func(c *gin.Context) {
-		// allow cors requests
-
-		// tips: Note that the port here is the port of your local gin service
-		c.Header("Access-Control-Allow-Origin", "http://localhost:8080")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		c.Header("Access-Control-Allow-Credentials", "true")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-		c.Next()
-	})
 	r.GET("/api/get", func(c *gin.Context) {
 		name, _ := c.GetQuery("name")
 		c.SetSameSite(http.SameSiteNoneMode)
