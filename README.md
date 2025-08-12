@@ -40,7 +40,7 @@ open localhost:8080/fire-doc
 
 ## 🎯 Code Examples
 
-
+**Gin Usage Examples**
 ```go
 package main
 
@@ -140,4 +140,26 @@ func main() {
 }
 
 
+```
+**Echo Usage Examples**
+```go
+package main
+
+import (
+	"net/http"
+
+	"github.com/dage212/fire-doc/firedoc"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+)
+
+
+e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	AllowOrigins:     []string{"http://localhost:8080", "http://127.0.0.1:8080"},
+	AllowMethods:     []string{echo.GET, echo.POST, echo.OPTIONS},
+	AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	AllowCredentials: true,
+}))
+	
+e.Any("/fire-doc/*", echo.WrapHandler(http.HandlerFunc(firedoc.FireDocIndexHandler)))
 ```
