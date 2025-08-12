@@ -31,7 +31,7 @@ r.Any("/fire-doc/*path", gin.WrapH(http.HandlerFunc(firedoc.FireDocIndexHandler)
 ```
 3. Run the fire-doc, port is your local service port:
 ```
-open localhost:8080/fire-doc
+open localhost:8080/fire-doc/
 ```   
 4. Open the page and enjoy it
    
@@ -154,12 +154,5 @@ import (
 )
 
 
-e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-	AllowOrigins:     []string{"http://localhost:8080", "http://127.0.0.1:8080"},
-	AllowMethods:     []string{echo.GET, echo.POST, echo.OPTIONS},
-	AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	AllowCredentials: true,
-}))
-	
 e.Any("/fire-doc/*", echo.WrapHandler(http.HandlerFunc(firedoc.FireDocIndexHandler)))
 ```
