@@ -13,10 +13,6 @@ fire-doc is a streamlined integration of postman and swagger. Unlike Swagger, wh
 
 ## 🚀 Installation
 
-### Prerequisites
-
-- Go 1.20 or later
-- Gin v1.10.1 or later
 
 ### Quick Start
 
@@ -25,7 +21,7 @@ fire-doc is a streamlined integration of postman and swagger. Unlike Swagger, wh
 go get github.com/dage212/fire-doc/firedoc@latest
 ```
 
-2. Modify the code:
+2. Configure the route /fire-doc/* to support all HTTP methods for /fire-doc/*. Implementation details may vary slightly between frameworks—refer to the Usage Examples for specific code. The same approach applies to other frameworks not listed.
 ```powershell
 r.Any("/fire-doc/*path", gin.WrapH(http.HandlerFunc(firedoc.FireDocIndexHandler)))
 ```
@@ -128,16 +124,24 @@ func main() {
 ```
 **Echo Usage Examples**
 ```go
-package main
-
-import (
-	"net/http"
-
-	"github.com/dage212/fire-doc/firedoc"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-)
-
-
 e.Any("/fire-doc/*", echo.WrapHandler(http.HandlerFunc(firedoc.FireDocIndexHandler)))
+```
+**Fiber Usage Examples**
+```go
+app.All("/fire-doc/*", adaptor.HTTPHandler(http.HandlerFunc(firedoc.FireDocIndexHandler)))
+```
+
+**Chi Usage Examples**
+```go
+r.Handle("/fire-doc/*", http.HandlerFunc(firedoc.FireDocIndexHandler))
+```
+**GoFrame Usage Examples**
+```go
+s.BindHandler("/fire-doc/*path", func(r *ghttp.Request) {
+		firedoc.FireDocIndexHandler(r.Response.Writer, r.Request)
+	})
+```
+**Beego Usage Examples**
+```go
+web.Handler("/fire-doc/*", http.HandlerFunc(firedoc.FireDocIndexHandler))
 ```
