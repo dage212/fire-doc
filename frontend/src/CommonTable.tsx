@@ -116,7 +116,7 @@ const CommonTable = forwardRef<RefProps, {data: DataType, type?: BodyType }>(({d
                     {dataSource?.[index]?.['type'] === "string" ? 
                         <Input value={dataSource?.[index]?.['value']}   onChange={(value:string) => update("value", value, record, index)} key={record.uuid}/>
                         
-                        : <MultiFileUpload value={(dataSource?.[index]?.['value'] ?? []) as File[]}   keys={dataSource?.[index]?.['keys']} key={record.uuid} onChange={(v) => update("value", v, record, index)} />
+                        : <MultiFileUpload value={(dataSource?.[index]?.['value'] ?? []) as File[]}   keys={dataSource?.[index]?.['keys']} key={record.uuid} onChange={(v) => update("value", v as File[], record, index)} />
                     } 
                     </>
                 )
