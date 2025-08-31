@@ -2,6 +2,7 @@ package firedoc
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -9,8 +10,16 @@ import (
 	"time"
 )
 
+// 文件信息结构体
+type FileInfo struct {
+	Name    string `json:"name"`
+	Size    int64  `json:"size"`
+	ModTime string `json:"modified_time"`
+	Path    string `json:"path"`
+}
+
 // SaveHandler handles POST requests, parses parameters, and generates a JSON file.
-func AddHandler(w http.ResponseWriter, r *http.Request) {
+func addHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -22,6 +31,18 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Failed to parse JSON", http.StatusBadRequest)
 		return
+	}
+
+	if payload, ok := params["payload"]; ok {
+		if payloadMap, ok := payload.(map[string]interface{}); ok {
+			if body, ok := payloadMap["body"]; ok {
+				if bodyMap, ok := body.(map[string]interface{}); ok {
+					if _, ok := bodyMap["data"]; ok {
+
+					}
+				}
+			}
+		}
 	}
 
 	// Add updateTime field to params
@@ -61,7 +82,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 		response := map[string]interface{}{
 			"code": 200,
 			"data": params["id"],
-			"msg":  "操作成功",
+			"msg":  "Operation successful",
 		}
 		json.NewEncoder(w).Encode(response)
 		return
@@ -118,13 +139,13 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 		response := map[string]interface{}{
 			"code": 200,
 			"data": params["id"],
-			"msg":  "操作成功",
+			"msg":  "Operation successful",
 		}
 		json.NewEncoder(w).Encode(response)
 	}
 }
 
-func GetHandler(w http.ResponseWriter, r *http.Request) {
+func getHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -135,10 +156,11 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 	urlFilter := r.URL.Query().Get("url")
 	methodFilter := r.URL.Query().Get("method")
 	descriptionFilter := r.URL.Query().Get("description")
-
+	var filteredData []map[string]interface{}
 	// Check if fire-doc.json exists
 	if _, err := os.Stat("fire-doc.json"); os.IsNotExist(err) {
-		http.Error(w, "File not found", http.StatusNotFound)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(filteredData)
 		return
 	}
 
@@ -159,7 +181,7 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Apply filters
-	var filteredData []map[string]interface{}
+
 	for _, entry := range data {
 		general := entry["general"].(map[string]interface{})
 		if id != "" && entry["id"] != id {
@@ -185,7 +207,7 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(filteredData)
 }
 
-func DelHandler(w http.ResponseWriter, r *http.Request) {
+func delHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -262,7 +284,136 @@ func DelHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Entry deleted successfully"))
 }
 
-func FireDocHandler(w http.ResponseWriter, r *http.Request) {
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	// Check request method
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse multipart form data
+	r.ParseMultipartForm(32 << 20) // 32 MB max memory
+
+	// Retrieve form fields
+	id := r.FormValue("id")
+	fileKey := r.MultipartForm.Value["fileKey"]
+
+	// Retrieve multiple files
+	files := r.MultipartForm.File["file"]
+
+	if len(files) == 0 {
+		http.Error(w, "No files provided", http.StatusBadRequest)
+		return
+	}
+
+	// Create uploads directory if not exists
+	uploadsDir := filepath.Join("./fire-doc", "temp", id)
+	if _, err := os.Stat(uploadsDir); err == nil {
+		// 如果目录已存在，先删除（包括所有子文件和子目录）
+		if err := os.RemoveAll(uploadsDir); err != nil {
+			http.Error(w, "Delete dir fail", http.StatusBadRequest)
+			return
+		}
+	}
+
+	// 重新创建目录（权限 0755）
+	if err := os.MkdirAll(uploadsDir, 0755); err != nil {
+		http.Error(w, "Failed to create directory", http.StatusBadRequest)
+		return
+	}
+
+	// Process each file
+	uploadedFiles := make([]map[string]interface{}, 0)
+
+	for index, fileHeader := range files {
+		// Open the file
+		file, err := fileHeader.Open()
+		if err != nil {
+			http.Error(w, "Error opening the file: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		uploadsDir := filepath.Join(uploadsDir, fileKey[index])
+
+		if _, err := os.Stat(uploadsDir); os.IsNotExist(err) {
+			os.MkdirAll(uploadsDir, 0755)
+		}
+		// Create destination file
+		dstPath := filepath.Join(uploadsDir, fileHeader.Filename)
+
+		dst, err := os.Create(dstPath)
+		if err != nil {
+			http.Error(w, "Unable to save the file", http.StatusInternalServerError)
+			return
+		}
+
+		// Copy uploaded file content
+		if _, err := io.Copy(dst, file); err != nil {
+			http.Error(w, "Error saving the file", http.StatusInternalServerError)
+			return
+		}
+
+		// Close files
+		dst.Close()
+		file.Close()
+
+		// Add file info to response
+		uploadedFiles = append(uploadedFiles, map[string]interface{}{
+			"fileName": fileHeader.Filename,
+			"fileUrl":  dstPath,
+		})
+	}
+
+	// Return success response
+	w.Header().Set("Content-Type", "application/json")
+	response := map[string]interface{}{
+		"code": 200,
+		"data": map[string]interface{}{
+			"id":      id,
+			"fileKey": fileKey,
+			"files":   uploadedFiles,
+		},
+		"msg": "Files uploaded successfully",
+	}
+	json.NewEncoder(w).Encode(response)
+}
+
+func getUploadHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	fileKey := r.URL.Query().Get("fileKey")
+	if id == "" {
+		http.Error(w, "Missing 'id' parameter", http.StatusBadRequest)
+		return
+	}
+
+	// Define the base directory for uploads
+	uploadsDir := filepath.Join("./fire-doc", "temp", id, fileKey)
+
+	// If no specific file path is provided, list all files in the directory
+
+	var fileInfos []FileInfo
+
+	files, _ := os.ReadDir(uploadsDir)
+	for _, file := range files {
+		info, err := file.Info()
+		if err != nil {
+			return
+		}
+		path := strings.TrimPrefix(uploadsDir, "fire-doc")
+		path = filepath.ToSlash(path)
+		fileInfos = append(fileInfos, FileInfo{
+			Name:    info.Name(),
+			Size:    info.Size(),
+			ModTime: info.ModTime().Format(time.RFC3339),
+			Path:    filepath.Join(path, file.Name()),
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(fileInfos)
+}
+
+func fireDocHandler(w http.ResponseWriter, r *http.Request) {
 	// Serve the FireDoc frontend files
 	urlPath := strings.SplitN(r.URL.Path, "/", 3)
 	if len(urlPath) > 2 {
@@ -281,15 +432,52 @@ func FireDocHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, absPath)
 }
 
+func getExampleHandler(w http.ResponseWriter, r *http.Request) {
+	response := map[string]interface{}{
+		"code": 200,
+		"data": "Hello World!",
+		"msg":  "get successfully",
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func getTempFile(w http.ResponseWriter, r *http.Request) {
+	baseDir := "fire-doc/temp"
+
+	// 去掉前导路径，比如你的路由是 /fire-doc/api/temp/*
+	relPath := strings.TrimPrefix(r.URL.Path, "/fire-doc/api/temp/")
+
+	// 拼接完整路径
+	absPath := filepath.Join(baseDir, relPath)
+
+	// 设置响应头，让浏览器当作附件下载
+	filename := filepath.Base(absPath)
+	w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
+	w.Header().Set("Content-Type", "application/octet-stream") // 二进制流
+	w.Header().Set("Content-Transfer-Encoding", "binary")
+
+	// 返回文件
+	http.ServeFile(w, r, absPath)
+}
+
 func FireDocIndexHandler(w http.ResponseWriter, r *http.Request) {
 	if strings.Contains(r.URL.Path, "save") {
-		AddHandler(w, r)
+		addHandler(w, r)
 	} else if strings.Contains(r.URL.Path, "get") {
-		GetHandler(w, r)
+		getHandler(w, r)
 	} else if strings.Contains(r.URL.Path, "del") {
-		DelHandler(w, r)
+		delHandler(w, r)
+	} else if strings.Contains(r.URL.Path, "upload") {
+		uploadHandler(w, r)
+	} else if strings.Contains(r.URL.Path, "example") {
+		getExampleHandler(w, r)
+	} else if strings.Contains(r.URL.Path, "files") {
+		getUploadHandler(w, r)
+	} else if strings.Contains(r.URL.Path, "temp") {
+		getTempFile(w, r)
 	} else {
-		FireDocHandler(w, r)
+		fireDocHandler(w, r)
 	}
 }
 

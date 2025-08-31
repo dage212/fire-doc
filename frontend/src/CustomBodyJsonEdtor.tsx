@@ -27,7 +27,7 @@ const JSONEditorReact = forwardRef<CustomBodyRefProps, JSONEditorProps>((props, 
       setValue(props.defaultValue)
     }, [props.defaultValue])
     
-    return (<div style={{height: 400}}>
+    return (<div style={{height: props.height ?? 'calc(100vh - 400px)'}}>
       <Editor 
         height="100%" 
         defaultLanguage={props.mode || 'json'} 

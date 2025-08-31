@@ -5,11 +5,12 @@ import { IconEditStroked } from '@douyinfe/semi-icons';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import type { DataSource } from './types';
+import { prefixApi } from './contexts';
 
 
 
 function del(id: string) {
-    axios.delete(`/fire-doc/api/del/${id}`).then((res) => {
+    axios.delete(`${prefixApi}/fire-doc/api/del/${id}`).then((res) => {
         console.log('del response:', res)
     })
 }
@@ -148,7 +149,7 @@ function List() {
     };
 
     useEffect(() => {
-        axios.get('/fire-doc/api/get').then((res) => {
+        axios.get(`${prefixApi}/fire-doc/api/get`).then((res) => {
             console.log('list response:', res.data)
             setData(res.data)
         }).catch((error) => {

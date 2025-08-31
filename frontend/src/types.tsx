@@ -1,3 +1,4 @@
+
 export type DataType = Record<string, string | undefined | null>
 
 export type DataSource = {
@@ -22,7 +23,8 @@ export type DataSource = {
 
 export type TableItem = {
     keys: string;
-    value: string;
+    value: string | undefined | File[];
+    type?: string;
     uuid: string;
 }
 
@@ -72,6 +74,7 @@ export type SendBtnProps = {
 export interface JSONEditorProps {
     id: string;
     mode: string;
+    height?: number | string;
     defaultValue: string
     readOnly?: boolean;
 }
@@ -79,4 +82,33 @@ export interface JSONEditorProps {
 export interface MyContextType {
     refresh: number | boolean;
     setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export  interface FileChange{
+  event: React.ChangeEvent<HTMLInputElement>;
+  file: File;
+  fileList: File[];
+}
+
+export interface FileChangeEvent {
+  value: File[] | null;
+  keys: string;
+  onChange: (value?: File[] | null) => void;
+}
+
+export interface FormDataBody {
+  [key: string]: string | FireDocFile
+}
+
+export interface FireDocFile{
+    name: string;
+    type: string;
+    size: number;
+    lastModified: number;
+    webkitRelativePath?: string;
+    lastModifiedDate?: Date;
+}
+
+export type FileRefProps = {
+  getValue: () => File[]
 }

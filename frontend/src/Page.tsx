@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Form, Button, Tabs, TabPane, useFormApi, Col, Row, Highlight, Divider, Modal } from '@douyinfe/semi-ui';
+import { Form, Button, Tabs, TabPane, useFormApi, Highlight, Divider, Modal } from '@douyinfe/semi-ui';
 import axios from 'axios';
 import { trim } from 'lodash';
 import CommonTable from './CommonTable';
@@ -7,8 +7,9 @@ import CustomBodyJsonEdtor from './CustomBodyJsonEdtor';
 import Body  from './Body';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router';
-import { BodyType, type ComposeRefProps, type DataSource, type FormApi, type RefProps, type SendBtnProps, type TableItem } from './types';
-import { MyContext } from './contexts';
+import { BodyType, type ComposeRefProps, type DataSource, type FireDocFile, type FormApi, type RefProps, type SendBtnProps, type TableItem } from './types';
+import { MyContext, prefixApi } from './contexts';
+import { SplitPaneStyle } from './Home';
 
 
 
@@ -36,8 +37,8 @@ const URlWrapper = styled.div`
 
 const initFormData = {
   general: {
-    url: 'http://localhost:3000/api/get',
-    method: 'GET',
+    url: '',
+    method: '',
     description: ''
   },
   headers: [
@@ -67,7 +68,7 @@ const CustomFormResponse: React.FC<{value: string}> = ({ value }) => {
         }}
       />
       <Divider margin='12px'/>
-      <CustomBodyJsonEdtor defaultValue={value} mode="json" id="response-body-json-editor" readOnly={true}/>
+      <CustomBodyJsonEdtor defaultValue={value} mode="json" id="response-body-json-editor" height={'calc(100vh)'} readOnly={true}/>
     </div>
   );
 };
@@ -80,7 +81,7 @@ function requestAll(formApi:FormApi, props: SendBtnProps) {
       const paramsData = props.params?.current?.getValue() || [];
       const params = (paramsData).reduce((acc: Record<string, string>, curr: TableItem) => {
         if(trim(curr.keys)) {
-          acc[trim(curr.keys)] = trim(curr.value);
+          acc[trim(curr.keys)] = trim(curr.value  as string);
         }
         return acc;
       }, {})
@@ -88,7 +89,58 @@ function requestAll(formApi:FormApi, props: SendBtnProps) {
       const headersData = props.headers?.current?.getValue() || [];
       const headersVal = (headersData).reduce((acc: Record<string, string>, curr: TableItem) => {
         if(trim(curr.keys)) {
-          acc[trim(curr.keys)] = trim(curr.value);
+          acc[trim(curr.keys)] = trim(curr.value  as string);
+        }
+        return acc;
+      }, {})
+
+      
+
+      const headers = {...headersVal};
+      const bodyData: Record<string, FireDocFile[]|string> = {}
+      if(body?.type === BodyType.JSON) {
+        headers['Content-Type'] = 'application/json';
+      } else if(body?.type === BodyType.XFormUrl) {
+        headers['Content-Type'] = 'application/x-www-form-urlencoded';
+      } else if(body?.type === BodyType.FormData) {
+        for(const [key, value] of (body.data as FormData)?.entries() ?? {}){
+          if(typeof value !== 'object'){
+            bodyData[key as string] = value;
+            bodyData['type'] = "string"
+          } else {
+            bodyData[key as string] = [];
+            bodyData['type'] = "file"
+          }
+        }
+        headers['Content-Type'] = 'multipart/form-data';
+      } else if(body?.type === BodyType.Raw) {
+        headers['Content-Type'] = 'text/plain';
+      }
+      return {
+        values,
+        params,
+        headers,
+        body: {data: bodyData, type: body?.type, rawData: body?.data}
+      }
+}
+
+function sendGetParams(formApi:FormApi, props: SendBtnProps) {
+      const values = formApi.getValues()
+
+      const body = props.body?.current?.getValue();
+
+      const paramsData = props.params?.current?.getValue() || [];
+      const params = (paramsData).reduce((acc: Record<string, string>, curr: TableItem) => {
+        if(trim(curr.keys)) {
+          acc[trim(curr.keys)] = trim(curr.value  as string);
+        }
+        return acc;
+      }, {})
+
+      const headersData = props.headers?.current?.getValue() || [];
+      const headersVal = (headersData).reduce((acc: Record<string, string>, curr: TableItem) => {
+        if(trim(curr.keys)) {
+          acc[trim(curr.keys)] = trim(curr.value  as string);
         }
         return acc;
       }, {})
@@ -137,7 +189,7 @@ const ButtonGroup: React.FC<SendBtnProps> = (props:SendBtnProps) => {
       });
     };
     const send = useCallback(() => {
-      const { values, params, headers, body } = requestAll(formApi, props);
+      const { values, params, headers, body } = sendGetParams(formApi, props);
       axios({
         method: values.general.method,
         url: values.general.url,
@@ -159,8 +211,7 @@ const ButtonGroup: React.FC<SendBtnProps> = (props:SendBtnProps) => {
     
     const confirm = useCallback((description: string) => {
       const { values, params, headers, body } = requestAll(formApi, props);
-      console.log('confirm values:', values)
-      axios.post('/fire-doc/api/save', {
+      axios.post(`${prefixApi}/fire-doc/api/save`, {
         id: values.id,
         general: {
           url: values.general.url,
@@ -169,7 +220,7 @@ const ButtonGroup: React.FC<SendBtnProps> = (props:SendBtnProps) => {
         },
         payload:{
           params: params,
-          body: body,
+          body: {data: body?.data, type: body?.type},
         },
         headers: headers,
         response: {
@@ -178,7 +229,23 @@ const ButtonGroup: React.FC<SendBtnProps> = (props:SendBtnProps) => {
       }).then((res) => {
         setRefresh((bool) => !bool)
         navigate(`/${res.data.data}`);
-        console.log('save response:', res)
+        console.log('POST Succesful:', body.rawData)
+        if(body.type === BodyType.FormData) {
+          const formData = new FormData();
+          for(const [key, value] of (body.rawData as FormData)!.entries()){
+            if(value instanceof File){
+              formData.append("fileKey", key)
+              formData.append("file", value);
+            }
+          }
+          if(formData.keys().next().done === false) {
+            formData.append("id", res.data.data)
+            axios.post(`${prefixApi}/fire-doc/api/upload`, formData).then((res => {
+              console.log('Upload Succesful:', res.data)
+            }))
+          }
+        }
+        
       })
     },[formApi, navigate, props, setRefresh]);
 
@@ -230,12 +297,12 @@ const FormArea: React.FC = () => {
     const [data, setData] = useState<DataSource>({} as DataSource)
     const params = useParams();
     useEffect(() => { 
-      axios.get(`/fire-doc/api/get?id=${params.id}`).then((res) => {
+      axios.get(`${prefixApi}/fire-doc/api/get?id=${params.id}`).then((res) => {
             console.log(`Get ${params.id} Response:`, res.data)
-            const formData = res.data?.[0] ?? {};
-            formApiRef.current?.formApi?.setValues(formData);
+            const data = res.data?.[0] ?? {};
+            formApiRef.current?.formApi?.setValues(data);
             setResponse('')
-            setData(formData)
+            setData(data)
         }).catch((error) => {
             setData({} as DataSource);
             console.error('Error fetching data:', error);
@@ -244,16 +311,15 @@ const FormArea: React.FC = () => {
 
    
     return (
-      <div style={{position: 'relative', padding: '20px'}}>
+      <div style={{position: 'relative', padding: '20px', height: '100%'}}>
        <Form  
         layout='vertical' 
         initValues={initFormData}
         ref={formApiRef}
       >
-        <Row gutter={40}>
-            <Col span={12}>
-               {/* <Title heading={3} style={{ margin: '8px 0' }} >Request</Title> */}
-               
+        <SplitPaneStyle split="vertical" minSize={500} defaultSize={700}>
+          
+            <div style={{margin: '0px 10px'}}>
               <div style={{ textAlign: 'right'}}>
                   <Highlight
                     sourceString={'Request'}
@@ -308,11 +374,11 @@ const FormArea: React.FC = () => {
                     </TabPane>
                 </Tabs>
               </div>
-            </Col>
-            <Col span={12}>
+            </div>
+            <div style={{margin: '0px 10px'}}>
                 <CustomFormResponse value={response}/>
-            </Col>
-        </Row>
+            </div>
+        </SplitPaneStyle>
       </Form >
     </div>
     )

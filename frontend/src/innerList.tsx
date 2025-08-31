@@ -10,7 +10,7 @@ import axios from "axios";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate, useParams  } from 'react-router';
 import styled from "styled-components";
-import { MyContext } from "./contexts";
+import { MyContext, prefixApi } from "./contexts";
 import type { DataSource } from "./types";
 
 const ListItemWrapper = styled(List.Item)`
@@ -45,7 +45,7 @@ function InnerList() {
     const navigate = useNavigate()
     const params = useParams();
     useEffect(() => {
-        axios.get('/fire-doc/api/get').then((res) => {
+        axios.get(`${prefixApi}/fire-doc/api/get`).then((res) => {
             console.log('GET All Succesful:', res.data)
             setData(res.data)
         }).catch((error) => {
@@ -56,7 +56,7 @@ function InnerList() {
 
     const del = useCallback((id: string) => {
         setRefresh(bool => !bool)
-        axios.delete(`/fire-doc/api/del/${id}`).then(() => {
+        axios.delete(`${prefixApi}/fire-doc/api/del/${id}`).then(() => {
             navigate('/')
         })
         setData(data.filter((item) => item.id !== id))
@@ -64,7 +64,7 @@ function InnerList() {
 
     const search = useCallback((value: string) => {
         console.log('Search Value:', value)
-        axios.get(`/fire-doc/api/get?url=${value}`).then((res) => {
+        axios.get(`${prefixApi}/fire-doc/api/get?url=${value}`).then((res) => {
             console.log('Search Succesful:', res.data)
             setData(res.data)
         }).catch((error) => {

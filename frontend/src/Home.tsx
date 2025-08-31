@@ -10,7 +10,7 @@ import bg from './assets/bg.png'
 
 const { Header, Content } = Layout;
 
-const SplitPaneStyle = styled(SplitPane)`
+export const SplitPaneStyle = styled(SplitPane)`
 .Resizer {
   background: var(--semi-color-border);
   z-index: 1;

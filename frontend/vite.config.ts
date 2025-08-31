@@ -7,9 +7,10 @@ export default defineConfig({
   base: '/fire-doc/',
   server: {
     proxy: {
-      '/fire-doc/api': {
-        target: 'http://localhost:8080',
+      '/prefix/fire-doc/api': {
+        target: 'http://localhost:8080/fire-doc/api',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/prefix\/fire-doc\/api/, '') 
       },
       '/api': {
         target: 'http://localhost:8080',

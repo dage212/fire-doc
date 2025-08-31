@@ -41,20 +41,30 @@ const Body = forwardRef<ComposeRefProps, {data: DataType}>(({data}, ref) => {
                     }
                     case BodyType.FormData: {
                         const bodyData = formDataRef.current?.getValue() ?? [];
-                        const data = (bodyData).reduce((acc: Record<string, string>, curr: TableItem) => {
-                          acc[trim(curr.keys)] = trim(curr.value);
+                        const data = (bodyData).reduce((acc: Record<string, string|File|undefined >, cur: TableItem) => {
+                          if(typeof cur.value === "object") { 
+                            cur.value.forEach((file, i) => {
+                              acc[`file_${i}/${trim(cur.keys)}`] = file;
+                            })
+                           }  else {
+                            acc[trim(cur.keys)] = trim(cur.value);
+                          } 
                           return acc;
                         }, {})
                         const formData = new FormData();
                         for(const key in data) {
-                            formData.append(key, data[key])
+                            if(key.startsWith("file_")) {
+                                formData.append(key.split('/')[1], data[key] as File)
+                            } else {
+                                formData.append(key, data[key] as string)
+                            }
                         }
                         return {data: formData, type: BodyType.FormData}
                     }
                     case BodyType.XFormUrl: {
                         const xformData = xformDataRef.current?.getValue() ?? [];
                         const data = (xformData).reduce((acc: Record<string, string>, curr: TableItem) => {
-                          acc[trim(curr.keys)] = trim(curr.value);
+                          acc[trim(curr.keys)] = trim(curr.value as string);
                           return acc;
                         }, {})
                          const searchParams = new URLSearchParams();
@@ -106,7 +116,7 @@ const Body = forwardRef<ComposeRefProps, {data: DataType}>(({data}, ref) => {
         ].join('\n')}/>
                 </TabPaneWrapper>
                 <TabPaneWrapper tab="form-data" itemKey="form-data">
-                    <CommonTable ref={formDataRef} data={initialData[BodyType.FormData] as unknown as DataType}/>
+                    <CommonTable ref={formDataRef} data={initialData[BodyType.FormData] as unknown as DataType} type={BodyType.FormData}/>
                 </TabPaneWrapper>
                 <TabPaneWrapper tab="x-www-form-urlencoded" itemKey="x-www-form-urlencoded">
                     <CommonTable ref={xformDataRef} data={initialData[BodyType.XFormUrl] as unknown as DataType}/>
