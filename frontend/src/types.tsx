@@ -44,10 +44,10 @@ export type JSONTYPE = {
 };
 export type ComposeRefProps = {
     getValue: () =>
-        | { data: JSONTYPE | null; type: BodyType; originStr?: string }
-        | { data: FormData | null; type: BodyType }
-        | { data: URLSearchParams | null; type:BodyType }
-        | { data: string | undefined | null; type: BodyType }
+        | { data: JSONTYPE | null; type: BodyType; originStr: string }
+        | { data: FormData | null; type: BodyType; originStr?: string }
+        | { data: URLSearchParams | null; type:BodyType; originStr?: string }
+        | { data: string | undefined | null; type: BodyType; originStr?: string }
         | null
 };
 

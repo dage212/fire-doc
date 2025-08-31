@@ -95,9 +95,9 @@ function requestAll(formApi:FormApi, props: SendBtnProps) {
       }, {})
 
       
-
       const headers = {...headersVal};
       const bodyData: Record<string, FireDocFile[]|string> = {}
+      
       if(body?.type === BodyType.JSON) {
         headers['Content-Type'] = 'application/json';
       } else if(body?.type === BodyType.XFormUrl) {
@@ -116,11 +116,20 @@ function requestAll(formApi:FormApi, props: SendBtnProps) {
       } else if(body?.type === BodyType.Raw) {
         headers['Content-Type'] = 'text/plain';
       }
+      let data = null
+      if(body?.type === BodyType.FormData) {
+        data = bodyData
+      } else if(body?.type === BodyType.JSON) {
+        data = body?.originStr;
+      } else {
+        data = body?.data;
+      }
+
       return {
         values,
         params,
         headers,
-        body: {data: bodyData, type: body?.type, rawData: body?.data}
+        body: {data, type: body?.type, rawData: body?.data}
       }
 }
 
@@ -229,10 +238,9 @@ const ButtonGroup: React.FC<SendBtnProps> = (props:SendBtnProps) => {
       }).then((res) => {
         setRefresh((bool) => !bool)
         navigate(`/${res.data.data}`);
-        console.log('POST Succesful:', body.rawData)
         if(body.type === BodyType.FormData) {
           const formData = new FormData();
-          for(const [key, value] of (body.rawData as FormData)!.entries()){
+          for(const [key, value] of (body.data as FormData)!.entries()){
             if(value instanceof File){
               formData.append("fileKey", key)
               formData.append("file", value);
